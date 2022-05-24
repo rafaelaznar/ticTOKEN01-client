@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>ticTOKEN Client</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <style>
+        pre {
+            white-space: pre-wrap;
+            /* Since CSS 2.1 */
+            white-space: -moz-pre-wrap;
+            /* Mozilla, since 1999 */
+            white-space: -pre-wrap;
+            /* Opera 4-6 */
+            white-space: -o-pre-wrap;
+            /* Opera 7 */
+            word-wrap: break-word;
+            /* Internet Explorer 5.5+ */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 my-5">
+                <h1>ticTOKEN client</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h2>AJAX commands</h2>
+                <a href="#" class="btn btn-success" id="login">Autentication</a>
+                <a href="#" class="btn btn-info" id="token">Get TOKEN</a>
+                <a href="#" class="btn btn-warning" id="secret">Get Secret</a>
+                <a href="#" class="btn btn-danger" id="logout">Logout</a>
+                <a href="#" class="btn btn-info" id="check">Check access</a>
+            </div>
+            <div class="col-md-6">
+                <h2>STATUS</h2>
+                <pre id="panelstatus"></pre>
+            </div>
+        </div>
+</body>
+<script>
+    $(document).ready(function () {
+        //var base = "https://daw.ausiasmarch.net/tomcat/ticTOKEN01-server/control";
+        var base = "http://127.0.0.1:8081/ticTOKEN01-server/control";
+        $('#login').click(function () {
+            $.ajax({
+                type: "GET",
+                url: base + '?ob=user&op=login&username=daw&password=ausias',
+                crossDomain: true,
+                xhrFields: {
+                    withCredentials: true
+                },
+                success: function (data) {
+                    localStorage.token = data;
+                    $('#panelstatus').append("LOGIN TOKEN: " + data + "\n");
+                },
+                error: function () {
+                    $('#panelstatus').append("LOGIN: error\n");
+                }
+            });
+        });
+        $('#check').click(function () {
+            $.ajax({
+                type: 'GET',
+                url: base + '?ob=user&op=check',
+                crossDomain: true,
+                jsonp: false,
+                xhrFields: {
+                    withCredentials: true
+                },
+                beforeSend: function (xhr) {
+                    if (localStorage.token) {
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token);
+                    }
+                },
+                success: function (data) {
+                    $('#panelstatus').append("CHECK USER: " + data + "\n");
+                },
+                error: function () {
+                    $('#panelstatus').append("CHECK: error\n");
+                }
+            });
+        });
+        $('#secret').click(function () {
+            $.ajax({
+                type: 'GET',
+                url: base + '?ob=user&op=secret',
+                crossDomain: true,
+                xhrFields: {
+                    withCredentials: true
+                },
+                beforeSend: function (xhr) {
+                    if (localStorage.token) {
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token);
+                    }
+                },
+                success: function (data) {
+                    $('#panelstatus').append("SECRET: " + data + "\n");
+                },
+                error: function () {
+                    $('#panelstatus').append("FAILED ACCESS: Can't get SECRET\n");
+                }
+            });
+        });
+        $('#token').click(function () {
+            $('#panelstatus').append("LOCAL STORAGE TOKEN: " + localStorage.token + "\n");
+        });
+        $('#logout').click(function () {
+            localStorage.clear();
+            $('#panelstatus').append("LOGOUT\n");
+        });
+
+    });
+</script>
+
+</html>
